@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiUpload, FiUser } from 'react-icons/fi';
+import { FiArrowLeft, FiUpload, FiUser, FiShield } from 'react-icons/fi';
 import { signOut } from '../../lib/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMyProfile, updateMyProfile, uploadAvatar } from '../../lib/supabase';
 import './Account.css';
 
 export default function AccountPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [profile, setProfile] = useState(null);
@@ -179,6 +179,19 @@ export default function AccountPage() {
           </button>
         </div>
       </header>
+
+      {isAdmin && (
+        <div className="account-admin-banner">
+          <FiShield size={20} />
+          <div className="account-admin-banner__text">
+            <span className="account-admin-banner__label">Admin Access</span>
+            <span className="account-admin-banner__desc">You have administrator privileges</span>
+          </div>
+          <Link to="/dashboard" className="account-admin-banner__btn">
+            Go to Admin Dashboard
+          </Link>
+        </div>
+      )}
 
       <div className="account-card">
         <h1 className="account-title">My profile</h1>

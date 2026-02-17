@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { signIn } from '../../lib/auth';
+import { checkIsAdmin } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import './Auth.css';
 
@@ -11,15 +12,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const explicitRedirect = searchParams.get('redirect');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await signIn(email, password);
-      navigate(redirectTo, { replace: true });
+      const { user } = await signIn(email, password);
+
+      if (explicitRedirect) {
+        navigate(explicitRedirect, { replace: true });
+      } else {
+        const admin = user ? await checkIsAdmin(user.id) : false;
+        navigate(admin ? '/dashboard' : '/account', { replace: true });
+      }
     } catch (err) {
       setError(err.message || 'Invalid email or password.');
     } finally {
@@ -31,7 +38,7 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <h1 className="auth-title">Sign In</h1>
-        <p className="auth-subtitle">Access the PBR admin dashboard</p>
+        <p className="auth-subtitle">Access your PBR account</p>
 
         {error && (
           <div className="auth-error" role="alert">

@@ -192,6 +192,237 @@ export async function getAllStats() {
 }
 
 // ============================================
+// User Roles API
+// ============================================
+export async function getUserRoles(userId) {
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId);
+
+  if (error) throw error;
+  return data?.map((r) => r.role) || [];
+}
+
+export async function checkIsAdmin(userId) {
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('role', 'admin')
+    .maybeSingle();
+
+  if (error) {
+    console.warn('[checkIsAdmin] Error checking admin role:', error.message);
+    return false;
+  }
+  return !!data;
+}
+
+// ============================================
+// Admin: Team Members API
+// ============================================
+export async function adminGetTeamMembers() {
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .order('display_order', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function adminUpdateTeamMember(id, updates) {
+  const { data, error } = await supabase
+    .from('team_members')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function adminDeleteTeamMember(id) {
+  const { error } = await supabase.from('team_members').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============================================
+// Admin: Publications API
+// ============================================
+export async function adminGetPublications() {
+  const { data, error } = await supabase
+    .from('publications')
+    .select('*')
+    .order('year', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function adminUpdatePublication(id, updates) {
+  const { data, error } = await supabase
+    .from('publications')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function adminDeletePublication(id) {
+  const { error } = await supabase.from('publications').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============================================
+// Admin: Research Projects API
+// ============================================
+export async function adminGetProjects() {
+  const { data, error } = await supabase
+    .from('research_projects')
+    .select('*')
+    .order('display_order', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function adminUpdateProject(id, updates) {
+  const { data, error } = await supabase
+    .from('research_projects')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function adminDeleteProject(id) {
+  const { error } = await supabase.from('research_projects').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============================================
+// Admin: Collaborations API
+// ============================================
+export async function adminGetCollaborations() {
+  const { data, error } = await supabase
+    .from('collaborations')
+    .select('*')
+    .order('display_order', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function adminUpdateCollaboration(id, updates) {
+  const { data, error } = await supabase
+    .from('collaborations')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function adminDeleteCollaboration(id) {
+  const { error } = await supabase.from('collaborations').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============================================
+// Admin: Contact Submissions API
+// ============================================
+export async function adminGetContactSubmissions() {
+  const { data, error } = await supabase
+    .from('contact_submissions')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function adminUpdateContactStatus(id, status) {
+  const { data, error } = await supabase
+    .from('contact_submissions')
+    .update({ status })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// ============================================
+// Admin: Researcher Applications API
+// ============================================
+export async function adminGetApplications() {
+  const { data, error } = await supabase
+    .from('researcher_applications')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function adminUpdateApplicationStatus(id, status, reviewerId) {
+  const { data, error } = await supabase
+    .from('researcher_applications')
+    .update({
+      status,
+      reviewed_by: reviewerId,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// ============================================
+// Admin: Dashboard Stats
+// ============================================
+export async function adminGetDashboardStats() {
+  const [teamRes, pubRes, projRes, collabRes, contactRes, appRes] = await Promise.all([
+    supabase.from('team_members').select('id, is_active', { count: 'exact' }),
+    supabase.from('publications').select('id, is_active', { count: 'exact' }),
+    supabase.from('research_projects').select('id, is_active, status', { count: 'exact' }),
+    supabase.from('collaborations').select('id, is_active', { count: 'exact' }),
+    supabase.from('contact_submissions').select('id, status', { count: 'exact' }),
+    supabase.from('researcher_applications').select('id, status', { count: 'exact' }),
+  ]);
+
+  return {
+    teamMembers: {
+      total: teamRes.data?.length || 0,
+      active: teamRes.data?.filter((t) => t.is_active).length || 0,
+    },
+    publications: {
+      total: pubRes.data?.length || 0,
+      active: pubRes.data?.filter((p) => p.is_active).length || 0,
+    },
+    projects: {
+      total: projRes.data?.length || 0,
+      active: projRes.data?.filter((p) => p.status === 'Active').length || 0,
+    },
+    collaborations: {
+      total: collabRes.data?.length || 0,
+      active: collabRes.data?.filter((c) => c.is_active).length || 0,
+    },
+    contactSubmissions: {
+      total: contactRes.data?.length || 0,
+      new: contactRes.data?.filter((c) => c.status === 'new').length || 0,
+    },
+    applications: {
+      total: appRes.data?.length || 0,
+      pending: appRes.data?.filter((a) => a.status === 'pending').length || 0,
+    },
+  };
+}
+
+// ============================================
 // User profile
 // ============================================
 export async function getMyProfile(userId) {

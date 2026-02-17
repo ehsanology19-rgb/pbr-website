@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HiMenuAlt3, HiX, HiChevronDown } from 'react-icons/hi';
+import { HiMenuAlt3, HiX, HiChevronDown, HiShieldCheck } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signOut } from '../lib/auth';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,7 +35,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
@@ -118,6 +118,16 @@ export default function Navbar() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
+                  {isAdmin && (
+                    <Link
+                      to="/dashboard"
+                      className="navbar__dropdown-item navbar__dropdown-item--admin"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <HiShieldCheck style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <Link
                     to="/account"
                     className="navbar__dropdown-item"
@@ -172,6 +182,11 @@ export default function Navbar() {
             ))}
             {user ? (
               <>
+                {isAdmin && (
+                  <Link to="/dashboard" className="navbar__mobile-link navbar__mobile-link--admin" onClick={() => setMobileOpen(false)}>
+                    Admin Dashboard
+                  </Link>
+                )}
                 <Link to="/account" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>Account</Link>
                 <button type="button" className="navbar__mobile-link" onClick={handleSignOut}>Sign out</button>
               </>
