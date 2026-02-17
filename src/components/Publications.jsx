@@ -7,6 +7,8 @@ import {
   HiOutlineStar,
 } from 'react-icons/hi';
 import { FiExternalLink } from 'react-icons/fi';
+import { getPublications } from '../lib/supabase';
+import { useSupabaseQuery } from '../hooks/useSupabase';
 import './Publications.css';
 
 const achievements = [
@@ -36,34 +38,12 @@ const achievements = [
   },
 ];
 
-const publications = [
-  {
-    title: 'Computational Analysis of Novel Bioactive Compounds Against Multi-Drug Resistant Pathogens',
-    journal: 'Journal of Molecular Modeling',
-    year: '2025',
-    type: 'In Silico',
-  },
-  {
-    title: 'Evaluation of Phytochemical Extracts for Anti-Inflammatory Activity via In Vitro Assays',
-    journal: 'International Journal of Pharmaceutical Sciences',
-    year: '2024',
-    type: 'In Vitro',
-  },
-  {
-    title: 'Preclinical Pharmacokinetic Profiling of a Novel Hepatoprotective Agent in Murine Models',
-    journal: 'Biomedicine & Pharmacotherapy',
-    year: '2024',
-    type: 'In Vivo',
-  },
-  {
-    title: 'Machine Learning Approaches for Predicting Drug-Target Interactions in Oncology',
-    journal: 'Computational Biology and Chemistry',
-    year: '2025',
-    type: 'In Silico',
-  },
-];
-
 export default function Publications() {
+  const { data: publications, loading } = useSupabaseQuery(
+    () => getPublications({ featured: true, limit: 6 }),
+    [],
+    []
+  );
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
 
   return (
@@ -102,35 +82,52 @@ export default function Publications() {
           ))}
         </div>
 
-        {/* Featured publications */}
-        <motion.div
-          className="publications__list-section"
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <h3 className="publications__list-heading">Featured Publications</h3>
-          <div className="publications__list">
-            {publications.map((pub, i) => (
-              <div className="publications__item" key={i}>
-                <div className="publications__item-left">
-                  <span className={`publications__item-type publications__item-type--${pub.type.replace(' ', '-').toLowerCase()}`}>
-                    {pub.type}
-                  </span>
-                  <span className="publications__item-year">{pub.year}</span>
-                </div>
-                <div className="publications__item-content">
-                  <h4 className="publications__item-title">{pub.title}</h4>
-                  <p className="publications__item-journal">{pub.journal}</p>
-                </div>
-                <FiExternalLink
-                  className="publications__item-link"
-                  size={18}
-                />
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        {/* Featured publications - only show if we have real data */}
+        {!loading && publications && publications.length > 0 && (
+          <motion.div
+            className="publications__list-section"
+            initial={{ opacity: 0, y: 30 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <h3 className="publications__list-heading">Featured Publications</h3>
+            <div className="publications__list">
+              {publications.map((pub) => {
+                const pubType = pub.publication_type || 'Research';
+                const typeClass = pubType.replace(/\s+/g, '-').toLowerCase();
+                return (
+                  <div className="publications__item" key={pub.id}>
+                    <div className="publications__item-left">
+                      <span className={`publications__item-type publications__item-type--${typeClass}`}>
+                        {pubType}
+                      </span>
+                      <span className="publications__item-year">{pub.year}</span>
+                    </div>
+                    <div className="publications__item-content">
+                      <h4 className="publications__item-title">{pub.title}</h4>
+                      <p className="publications__item-journal">{pub.journal}</p>
+                    </div>
+                    {(pub.doi || pub.external_link) && (
+                      <a
+                        href={pub.external_link || `https://doi.org/${pub.doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="publications__item-link-btn"
+                        aria-label="View publication"
+                      >
+                        <FiExternalLink size={18} />
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {loading && (
+          <div className="publications__loading">Loading publications...</div>
+        )}
       </div>
     </section>
   );

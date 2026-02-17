@@ -139,6 +139,14 @@
   gap: 10px;
 }
 
+/* Loading state */
+.projects__loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--color-text-light);
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   .projects__grid {
     grid-template-columns: 1fr;

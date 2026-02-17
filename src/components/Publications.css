@@ -180,6 +180,28 @@
   color: var(--color-teal);
 }
 
+.publications__item-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light);
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+  text-decoration: none;
+}
+
+.publications__item-link-btn:hover {
+  color: var(--color-teal);
+}
+
+/* Loading state */
+.publications__loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-text-light);
+  font-size: 1rem;
+}
+
 @media (max-width: 1024px) {
   .publications__achievements {
     grid-template-columns: repeat(2, 1fr);
