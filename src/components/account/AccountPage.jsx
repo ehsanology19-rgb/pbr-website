@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiUpload, FiUser } from 'react-icons/fi';
+import { FiArrowLeft, FiUpload, FiUser, FiSettings } from 'react-icons/fi';
 import { signOut } from '../../lib/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMyProfile, updateMyProfile, uploadAvatar } from '../../lib/supabase';
 import './Account.css';
 
 export default function AccountPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [profile, setProfile] = useState(null);
@@ -157,8 +157,13 @@ export default function AccountPage() {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('[AccountPage] Sign out error:', error);
+      window.location.href = '/';
+    }
   };
 
   if (loading) {
@@ -178,9 +183,16 @@ export default function AccountPage() {
           <Link to="/" className="account-header__back">
             <FiArrowLeft size={20} /> Back to site
           </Link>
-          <button type="button" className="account-header__logout" onClick={handleSignOut}>
-            Sign out
-          </button>
+          <div className="account-header__actions">
+            {isAdmin && (
+              <Link to="/dashboard" className="account-header__admin">
+                <FiSettings size={16} /> Admin Dashboard
+              </Link>
+            )}
+            <button type="button" className="account-header__logout" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 

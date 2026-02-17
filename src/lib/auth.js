@@ -112,31 +112,31 @@ export async function getSession() {
 
 /**
  * Get current user's role from user_roles (admin, instructor, student).
- * Uses in-memory cache to avoid repeated database queries.
+ * Uses in-memory cache for subsequent calls within the same session.
+ * Pass skipCache=true to force a fresh fetch from the database.
  */
-export async function getUserRole(userId) {
-  if (roleCache.has(userId)) {
+export async function getUserRole(userId, { skipCache = false } = {}) {
+  if (!skipCache && roleCache.has(userId)) {
     const cached = roleCache.get(userId);
     console.log(`[getUserRole] Using cached role for ${userId}:`, cached);
     return cached;
   }
 
   try {
-    console.log(`[getUserRole] Fetching role for userId: ${userId}`);
-    const { data, error, count } = await supabase
+    console.log(`[getUserRole] Fetching role from DB for userId: ${userId}`);
+    const { data, error } = await supabase
       .from('user_roles')
-      .select('role', { count: 'exact' })
+      .select('role')
       .eq('user_id', userId)
       .limit(1)
       .maybeSingle();
 
     if (error) {
       console.error('[getUserRole] Supabase error:', error);
-      console.error('[getUserRole] Error details:', JSON.stringify(error, null, 2));
       throw error;
     }
 
-    console.log(`[getUserRole] Query result - data:`, data, 'count:', count);
+    console.log(`[getUserRole] Query result - data:`, data);
     
     if (!data) {
       console.warn(`[getUserRole] No role found for userId ${userId}, defaulting to 'student'`);
@@ -151,7 +151,6 @@ export async function getUserRole(userId) {
     return role;
   } catch (err) {
     console.error('[getUserRole] Error fetching role:', err);
-    console.error('[getUserRole] Error stack:', err.stack);
     throw err;
   }
 }

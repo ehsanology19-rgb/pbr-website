@@ -32,6 +32,33 @@
   color: var(--color-teal);
 }
 
+.account-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-header__admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background: var(--color-teal);
+  border: 1px solid var(--color-teal);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.account-header__admin:hover {
+  background: var(--color-deep-teal);
+  transform: translateY(-1px);
+  color: var(--color-white);
+}
+
 .account-header__logout {
   padding: 8px 14px;
   font-size: 0.9rem;
