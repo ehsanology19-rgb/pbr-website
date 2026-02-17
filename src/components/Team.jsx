@@ -87,9 +87,13 @@ export default function Team() {
             >
               <div
                 className="team__avatar"
-                style={{ background: member.avatar_color || member.color }}
+                style={!member.photo_url ? { background: member.avatar_color || member.color } : undefined}
               >
-                <span>{member.initials}</span>
+                {member.photo_url ? (
+                  <img src={member.photo_url} alt={member.name} className="team__avatar-img" />
+                ) : (
+                  <span>{member.initials || member.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}</span>
+                )}
               </div>
               <h4 className="team__name">{member.name}</h4>
               <p className="team__role">{member.role}</p>
