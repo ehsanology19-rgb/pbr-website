@@ -2,10 +2,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProtectedRoute({ children }) {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, role, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <div className="auth-page">
         <div className="auth-card">
@@ -17,6 +17,16 @@ export default function ProtectedRoute({ children }) {
 
   if (!user) {
     return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} state={{ from: location }} replace />;
+  }
+
+  if (role === null) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <p className="auth-subtitle">Verifying access...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAdmin) {

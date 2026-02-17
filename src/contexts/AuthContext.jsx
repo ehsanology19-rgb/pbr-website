@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setLoading(false);
       if (session?.user) {
         try {
           const r = await getUserRole(session.user.id);
@@ -22,13 +23,13 @@ export function AuthProvider({ children }) {
       } else {
         setRole(null);
       }
-      setLoading(false);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false);
       if (session?.user) {
         try {
           const r = await getUserRole(session.user.id);
@@ -39,7 +40,6 @@ export function AuthProvider({ children }) {
       } else {
         setRole(null);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

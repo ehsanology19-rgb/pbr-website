@@ -1,5 +1,8 @@
 import { supabase } from './supabase';
 
+// In-memory role cache to avoid repeated database queries (e.g. dashboard, ProtectedRoute)
+const roleCache = new Map();
+
 /**
  * Sign in with email and password
  */
@@ -65,11 +68,12 @@ async function ensureProfileAndRole(user, fullName) {
 }
 
 /**
- * Sign out current user
+ * Sign out current user. Clears role cache so next login gets fresh role.
  */
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+  roleCache.clear();
 }
 
 /**
@@ -82,19 +86,26 @@ export async function getSession() {
 }
 
 /**
- * Get current user's role from user_roles (admin, instructor, student)
+ * Get current user's role from user_roles (admin, instructor, student).
+ * Uses in-memory cache to avoid repeated database queries.
  */
 export async function getUserRole(userId) {
+  if (roleCache.has(userId)) {
+    return roleCache.get(userId);
+  }
+
   const { data, error } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (error) throw error;
-  return data?.role || 'student';
+
+  const role = data?.role || 'student';
+  roleCache.set(userId, role);
+  return role;
 }
 
 /**
@@ -103,4 +114,15 @@ export async function getUserRole(userId) {
 export async function isAdmin(userId) {
   const role = await getUserRole(userId);
   return role === 'admin';
+}
+
+/**
+ * Clear role cache (e.g. after role update in admin). Pass userId to clear one, or nothing to clear all.
+ */
+export function clearRoleCache(userId) {
+  if (userId) {
+    roleCache.delete(userId);
+  } else {
+    roleCache.clear();
+  }
 }
