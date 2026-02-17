@@ -97,24 +97,36 @@ export async function getUserRole(userId) {
   }
 
   try {
-    const { data, error } = await supabase
+    console.log(`[getUserRole] Fetching role for userId: ${userId}`);
+    const { data, error, count } = await supabase
       .from('user_roles')
-      .select('role')
+      .select('role', { count: 'exact' })
       .eq('user_id', userId)
       .limit(1)
       .maybeSingle();
 
     if (error) {
       console.error('[getUserRole] Supabase error:', error);
+      console.error('[getUserRole] Error details:', JSON.stringify(error, null, 2));
       throw error;
     }
 
-    const role = data?.role || 'student';
-    console.log(`[getUserRole] Fetched role for ${userId}:`, role, 'Raw data:', data);
+    console.log(`[getUserRole] Query result - data:`, data, 'count:', count);
+    
+    if (!data) {
+      console.warn(`[getUserRole] No role found for userId ${userId}, defaulting to 'student'`);
+      const role = 'student';
+      roleCache.set(userId, role);
+      return role;
+    }
+
+    const role = data.role || 'student';
+    console.log(`[getUserRole] Fetched role for ${userId}:`, role);
     roleCache.set(userId, role);
     return role;
   } catch (err) {
     console.error('[getUserRole] Error fetching role:', err);
+    console.error('[getUserRole] Error stack:', err.stack);
     throw err;
   }
 }
@@ -136,4 +148,12 @@ export function clearRoleCache(userId) {
   } else {
     roleCache.clear();
   }
+}
+
+/**
+ * Force refresh role for current user (clears cache and refetches)
+ */
+export async function refreshUserRole(userId) {
+  roleCache.delete(userId);
+  return getUserRole(userId);
 }
