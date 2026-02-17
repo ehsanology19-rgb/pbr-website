@@ -30,37 +30,50 @@ export default function AccountPage() {
       return;
     }
     let cancelled = false;
-    
+    const timeoutId = setTimeout(() => {
+      if (cancelled) return;
+      setLoading(false);
+      setError('Profile load timed out. Please refresh the page.');
+    }, 12000);
+
     getMyProfile(user.id)
       .then((data) => {
         if (!cancelled) {
           setProfile(data);
+          const base = data || {};
           setForm({
-            full_name: data.full_name || '',
-            email: data.email || '',
-            phone: data.phone || '',
-            university: data.university || '',
-            field_of_study: data.field_of_study || '',
-            bio: data.bio || '',
+            full_name: base.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+            email: base.email || user.email || '',
+            phone: base.phone || '',
+            university: base.university || '',
+            field_of_study: base.field_of_study || '',
+            bio: base.bio || '',
           });
         }
       })
       .catch((e) => {
-        // Ignore abort errors
         if (e.name === 'AbortError' || e.message?.includes('aborted')) {
           return;
         }
         if (!cancelled) {
-          const errorMessage = e.message || 'Failed to load profile';
-          setError(errorMessage);
+          setError(e.message || 'Failed to load profile');
+          setForm((prev) => ({
+            ...prev,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+            email: user.email || '',
+          }));
         }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          clearTimeout(timeoutId);
+          setLoading(false);
+        }
       });
-    
-    return () => { 
-      cancelled = true; 
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
     };
   }, [user]);
 

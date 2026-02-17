@@ -12,11 +12,19 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Create a dummy client if env vars are missing (for development/build time)
+// This prevents the app from crashing immediately, allowing ErrorBoundary to catch it
+let supabaseClient;
+
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env');
+  console.error('Missing Supabase environment variables. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env');
+  // Create a client with placeholder values - it will fail at runtime but won't crash the build
+  supabaseClient = createClient('https://placeholder.supabase.co', 'placeholder-key');
+} else {
+  supabaseClient = createClient(supabaseUrl, supabaseKey);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = supabaseClient;
 
 // ============================================
 // Team Members API
@@ -418,16 +426,27 @@ export async function updateMemberRole(userId, role) {
 // User profile (researcher / member)
 // ============================================
 export async function getMyProfile(userId) {
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (error) throw error;
   return data;
 }
 
 export async function updateMyProfile(userId, updates) {
+  const payload = { ...updates, updated_at: new Date().toISOString() };
+  const { data: existing } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+  if (existing) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
   const { data, error } = await supabase
     .from('profiles')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', userId)
+    .insert([{ id: userId, ...payload }])
     .select()
     .single();
   if (error) throw error;

@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
       if (session?.user) {
         try {
           const r = await getUserRole(session.user.id);
-          setRole(r);
+          setRole(r ?? 'student');
         } catch {
           setRole('student');
         }
@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
       if (session?.user) {
         try {
           const r = await getUserRole(session.user.id);
-          setRole(r);
+          setRole(r ?? 'student');
         } catch {
           setRole('student');
         }
@@ -44,6 +44,13 @@ export function AuthProvider({ children }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fallback: if role is still null after 6s (e.g. getUserRole hung), set student so UI doesn't stay stuck
+  useEffect(() => {
+    if (!user || role !== null) return;
+    const t = setTimeout(() => setRole('student'), 6000);
+    return () => clearTimeout(t);
+  }, [user, role]);
 
   const value = {
     user,
