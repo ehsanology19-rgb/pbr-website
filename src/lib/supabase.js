@@ -200,23 +200,41 @@ export async function getUserRoles(userId) {
     .select('role')
     .eq('user_id', userId);
 
-  if (error) throw error;
+  if (error) {
+    console.warn('[getUserRoles] Error:', error.message);
+    return [];
+  }
   return data?.map((r) => r.role) || [];
 }
 
 export async function checkIsAdmin(userId) {
-  const { data, error } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .eq('role', 'admin')
-    .maybeSingle();
+  try {
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('is_admin');
 
-  if (error) {
-    console.warn('[checkIsAdmin] Error checking admin role:', error.message);
+    if (!rpcError && typeof rpcResult === 'boolean') {
+      return rpcResult;
+    }
+
+    if (rpcError) {
+      console.warn('[checkIsAdmin] RPC not available, falling back to direct query:', rpcError.message);
+    }
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.warn('[checkIsAdmin] Fallback query error:', error.message);
+      return false;
+    }
+
+    const roles = data?.map((r) => r.role) || [];
+    return roles.includes('admin');
+  } catch (err) {
+    console.error('[checkIsAdmin] Unexpected error:', err);
     return false;
   }
-  return !!data;
 }
 
 // ============================================
@@ -231,10 +249,20 @@ export async function adminGetTeamMembers() {
   return data;
 }
 
+export async function adminCreateTeamMember(payload) {
+  const { data, error } = await supabase
+    .from('team_members')
+    .insert([payload])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function adminUpdateTeamMember(id, updates) {
   const { data, error } = await supabase
     .from('team_members')
-    .update(updates)
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();
@@ -259,10 +287,20 @@ export async function adminGetPublications() {
   return data;
 }
 
+export async function adminCreatePublication(payload) {
+  const { data, error } = await supabase
+    .from('publications')
+    .insert([payload])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function adminUpdatePublication(id, updates) {
   const { data, error } = await supabase
     .from('publications')
-    .update(updates)
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();
@@ -287,10 +325,20 @@ export async function adminGetProjects() {
   return data;
 }
 
+export async function adminCreateProject(payload) {
+  const { data, error } = await supabase
+    .from('research_projects')
+    .insert([payload])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function adminUpdateProject(id, updates) {
   const { data, error } = await supabase
     .from('research_projects')
-    .update(updates)
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();
@@ -315,10 +363,20 @@ export async function adminGetCollaborations() {
   return data;
 }
 
+export async function adminCreateCollaboration(payload) {
+  const { data, error } = await supabase
+    .from('collaborations')
+    .insert([payload])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function adminUpdateCollaboration(id, updates) {
   const { data, error } = await supabase
     .from('collaborations')
-    .update(updates)
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();

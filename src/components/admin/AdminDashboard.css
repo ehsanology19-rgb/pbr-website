@@ -836,3 +836,186 @@ td .admin-progress .admin-progress__bar::after {
     padding: 10px 12px;
   }
 }
+
+/* ============================================
+   Modal
+   ============================================ */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 37, 64, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.admin-modal {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-modal__title {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--color-navy);
+  font-weight: 700;
+}
+
+.admin-modal__close {
+  background: none;
+  border: none;
+  color: var(--color-text-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.admin-modal__close:hover {
+  color: var(--color-text);
+  background: var(--color-off-white);
+}
+
+.admin-modal__form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.admin-modal__body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-modal__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.admin-modal__req {
+  color: #ef4444;
+}
+
+.admin-modal__input {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  background: var(--color-white);
+  color: var(--color-text);
+}
+
+.admin-modal__input:focus {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.12);
+}
+
+.admin-modal__input:disabled {
+  background: var(--color-off-white);
+  cursor: not-allowed;
+}
+
+textarea.admin-modal__input {
+  resize: vertical;
+  min-height: 70px;
+}
+
+select.admin-modal__input {
+  cursor: pointer;
+}
+
+.admin-modal__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.admin-modal__checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-teal);
+  cursor: pointer;
+}
+
+.admin-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-off-white);
+}
+
+.admin-modal__footer .btn {
+  padding: 10px 20px;
+  font-size: 0.88rem;
+}
+
+/* Add button in section headers */
+.admin-section-header .btn-primary {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.admin-section-header {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-section-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .admin-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .admin-modal-overlay {
+    padding: 0;
+  }
+}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { checkIsAdmin } from '../lib/supabase';
 
@@ -6,26 +6,10 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminLoading, setAdminLoading] = useState(false);
-
-  const fetchAdminStatus = useCallback(async (userId) => {
-    if (!userId) {
-      setIsAdmin(false);
-      return;
-    }
-    setAdminLoading(true);
-    try {
-      const admin = await checkIsAdmin(userId);
-      setIsAdmin(admin);
-    } catch (err) {
-      console.error('[AuthContext] Error checking admin status:', err);
-      setIsAdmin(false);
-    } finally {
-      setAdminLoading(false);
-    }
-  }, []);
+  const [adminChecked, setAdminChecked] = useState(false);
+  const lastCheckedId = useRef(null);
 
   useEffect(() => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -33,7 +17,8 @@ export function AuthProvider({ children }) {
 
     if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
       console.error('[AuthContext] Supabase not configured.');
-      setLoading(false);
+      setAuthReady(true);
+      setAdminChecked(true);
       return;
     }
 
@@ -41,39 +26,66 @@ export function AuthProvider({ children }) {
       if (error) {
         console.error('[AuthContext] Error getting session:', error);
       }
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchAdminStatus(currentUser.id);
-      }
-      setLoading(false);
+      setUser(session?.user ?? null);
+      setAuthReady(true);
     }).catch((err) => {
       console.error('[AuthContext] Failed to get session:', err);
-      setLoading(false);
+      setAuthReady(true);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchAdminStatus(currentUser.id);
-      } else {
-        setIsAdmin(false);
-      }
-      setLoading(false);
+      setUser(session?.user ?? null);
+      setAuthReady(true);
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchAdminStatus]);
+  }, []);
+
+  useEffect(() => {
+    const userId = user?.id ?? null;
+
+    if (!userId) {
+      setIsAdmin(false);
+      setAdminChecked(true);
+      lastCheckedId.current = null;
+      return;
+    }
+
+    if (lastCheckedId.current === userId) {
+      return;
+    }
+
+    let cancelled = false;
+    setAdminChecked(false);
+
+    checkIsAdmin(userId)
+      .then((result) => {
+        if (cancelled) return;
+        lastCheckedId.current = userId;
+        setIsAdmin(result);
+        setAdminChecked(true);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('[AuthContext] Admin check failed:', err);
+        lastCheckedId.current = userId;
+        setIsAdmin(false);
+        setAdminChecked(true);
+      });
+
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const loading = !authReady || (!!user && !adminChecked);
 
   const value = {
     user,
     loading,
     isAuthenticated: !!user,
     isAdmin,
-    adminLoading,
+    adminLoading: !!user && !adminChecked,
   };
 
   return (

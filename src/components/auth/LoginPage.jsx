@@ -24,7 +24,12 @@ export default function LoginPage() {
       if (explicitRedirect) {
         navigate(explicitRedirect, { replace: true });
       } else {
-        const admin = user ? await checkIsAdmin(user.id) : false;
+        let admin = false;
+        try {
+          admin = user ? await checkIsAdmin(user.id) : false;
+        } catch {
+          admin = false;
+        }
         navigate(admin ? '/dashboard' : '/account', { replace: true });
       }
     } catch (err) {
