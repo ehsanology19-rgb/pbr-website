@@ -17,9 +17,9 @@ This document outlines optimizations applied to improve dashboard and auth loadi
 
 ## 3. Protected route behavior (`src/components/auth/ProtectedRoute.jsx`)
 
-- **Loading only when needed**: Full-screen “Loading…” is shown only when `loading && !user` (session still unknown). Once we know the user, we don’t block the whole UI on role.
-- **Verifying access**: If the user is set but `role === null` (still loading), a short “Verifying access…” state is shown instead of a generic loading screen.
-- **Admin check**: After role is loaded, non-admins see “Access denied” and redirect; admins see the dashboard.
+- **Loading only when needed**: Full-screen "Loading…" is shown only when `loading && !user` (session still unknown). Once we know the user, we don't block the whole UI on role.
+- **Verifying access**: If the user is set but `role === null` (still loading), a short "Verifying access…" state is shown instead of a generic loading screen.
+- **Admin check**: After role is loaded, non-admins see "Access denied" and redirect; admins see the dashboard.
 
 ## 4. Dashboard stats (`src/lib/supabase.js` + `DashboardHome.jsx`)
 
@@ -39,5 +39,5 @@ This document outlines optimizations applied to improve dashboard and auth loadi
 
 - Auth no longer blocks on role fetch; session is shown first, role updates after.
 - Role is cached to avoid repeated DB calls and the role query is simplified.
-- Protected route shows loading only while session or role is unknown, then either “Verifying access…”, “Access denied”, or the dashboard.
+- Protected route shows loading only while session or role is unknown, then either "Verifying access…", "Access denied", or the dashboard.
 - Dashboard home uses count-only stats for faster load and less data transfer.
