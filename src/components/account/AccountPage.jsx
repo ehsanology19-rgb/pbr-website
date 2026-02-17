@@ -25,8 +25,12 @@ export default function AccountPage() {
   });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
+    
     getMyProfile(user.id)
       .then((data) => {
         if (!cancelled) {
@@ -42,12 +46,22 @@ export default function AccountPage() {
         }
       })
       .catch((e) => {
-        if (!cancelled) setError(e.message);
+        // Ignore abort errors
+        if (e.name === 'AbortError' || e.message?.includes('aborted')) {
+          return;
+        }
+        if (!cancelled) {
+          const errorMessage = e.message || 'Failed to load profile';
+          setError(errorMessage);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    
+    return () => { 
+      cancelled = true; 
+    };
   }, [user]);
 
   const handleChange = (e) => {

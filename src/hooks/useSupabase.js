@@ -23,7 +23,12 @@ export function useSupabaseQuery(fetchFn, deps = [], fallbackData = null) {
           setData(result);
         }
       } catch (err) {
-        console.error('Supabase query error:', err);
+        // Ignore abort errors - they're expected when component unmounts or requests are cancelled
+        if (err.name === 'AbortError' || err.message?.includes('aborted') || err.message?.includes('signal is aborted')) {
+          return;
+        }
+        const errorMessage = err.message || err.toString();
+        console.error('Supabase query error:', errorMessage);
         if (isMounted) {
           setError(err);
           // Keep fallback data on error
@@ -40,6 +45,7 @@ export function useSupabaseQuery(fetchFn, deps = [], fallbackData = null) {
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   return { data, loading, error, refetch: () => {} };
@@ -62,7 +68,12 @@ export function useSupabaseMutation(mutationFn) {
       setData(result);
       return { data: result, error: null };
     } catch (err) {
-      console.error('Supabase mutation error:', err);
+      // Ignore abort errors
+      if (err.name === 'AbortError' || err.message?.includes('aborted') || err.message?.includes('signal is aborted')) {
+        return { data: null, error: null };
+      }
+      const errorMessage = err.message || err.toString();
+      console.error('Supabase mutation error:', errorMessage);
       setError(err);
       return { data: null, error: err };
     } finally {
