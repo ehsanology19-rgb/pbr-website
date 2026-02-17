@@ -529,3 +529,29 @@ export async function uploadAvatar(userId, file) {
   const { data: urlData } = supabase.storage.from(AVATARS_BUCKET).getPublicUrl(path);
   return urlData.publicUrl;
 }
+
+/**
+ * Upload an admin image (team photos, project images, logos, etc.)
+ * Stores under the admin user's folder in the avatars bucket.
+ * @param {string} userId - Current admin user's ID
+ * @param {File} file - The image file to upload
+ * @param {string} category - Subfolder category (e.g. 'team', 'projects', 'collaborations')
+ * @returns {string} Public URL of the uploaded image
+ */
+export async function adminUploadImage(userId, file, category = 'uploads') {
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const uniqueId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+  const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').substring(0, 50);
+  const path = `${userId}/${category}/${uniqueId}-${safeName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(AVATARS_BUCKET)
+    .upload(path, file, {
+      upsert: true,
+      contentType: file.type || `image/${ext}`,
+    });
+  if (uploadError) throw uploadError;
+
+  const { data: urlData } = supabase.storage.from(AVATARS_BUCKET).getPublicUrl(path);
+  return urlData.publicUrl;
+}
