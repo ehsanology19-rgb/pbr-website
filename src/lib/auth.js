@@ -17,23 +17,48 @@ export async function signIn(email, password) {
  */
 export async function signUp(email, password, options = {}) {
   const { fullName } = options;
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { full_name: fullName || email.split('@')[0] },
-    },
-  });
-  if (error) throw error;
-
-  if (data.user) {
-    try {
-      await ensureProfileAndRole(data.user, fullName || data.user.email?.split('@')[0]);
-    } catch (e) {
-      console.warn('Profile/role setup failed:', e);
-    }
+  
+  // Check if Supabase is properly configured
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+    throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.');
   }
-  return data;
+  
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName || email.split('@')[0] },
+      },
+    });
+    
+    if (error) {
+      // Enhance error messages for common issues
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        throw new Error('Network error: Unable to connect to Supabase. Please check your internet connection and Supabase project status.');
+      }
+      throw error;
+    }
+
+    if (data.user) {
+      try {
+        await ensureProfileAndRole(data.user, fullName || data.user.email?.split('@')[0]);
+      } catch (e) {
+        console.warn('Profile/role setup failed:', e);
+        // Don't throw here - signup succeeded even if profile setup failed
+      }
+    }
+    return data;
+  } catch (err) {
+    // Re-throw with enhanced error message if it's a network error
+    if (err.message?.includes('Failed to fetch') || err.name === 'TypeError') {
+      throw new Error('Network error: Unable to connect to Supabase. Please check your internet connection and ensure your Supabase project is active.');
+    }
+    throw err;
+  }
 }
 
 /**

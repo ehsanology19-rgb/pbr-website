@@ -10,7 +10,23 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Check Supabase configuration
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+      console.error('[AuthContext] Supabase not configured. Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY');
+      setLoading(false);
+      return;
+    }
+    
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (error) {
+        console.error('[AuthContext] Error getting session:', error);
+        setLoading(false);
+        return;
+      }
+      
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user) {
@@ -27,6 +43,9 @@ export function AuthProvider({ children }) {
         console.log('[AuthContext] No user session');
         setRole(null);
       }
+    }).catch((err) => {
+      console.error('[AuthContext] Failed to get session (network error):', err);
+      setLoading(false);
     });
 
     const {

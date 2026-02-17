@@ -21,7 +21,25 @@ export default function SignupPage() {
       setSuccess(true);
       setTimeout(() => navigate('/', { replace: true }), 2000);
     } catch (err) {
-      setError(err.message || 'Sign up failed. Please try again.');
+      // Provide more helpful error messages
+      let errorMessage = 'Sign up failed. Please try again.';
+      
+      if (err.message) {
+        if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+          errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and ensure Supabase is configured correctly.';
+        } else if (err.message.includes('Invalid API key') || err.message.includes('JWT')) {
+          errorMessage = 'Configuration error: Please check your Supabase API keys in the environment variables.';
+        } else if (err.message.includes('already registered')) {
+          errorMessage = 'This email is already registered. Please sign in instead.';
+        } else if (err.message.includes('Password')) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      console.error('[SignupPage] Sign up error:', err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
