@@ -339,6 +339,34 @@ export async function getContactSubmissions() {
   return data;
 }
 
+// ============================================
+// Admin: Dashboard Stats (Optimized Count Queries)
+// ============================================
+export async function getDashboardStats() {
+  const [teamResult, pubsResult, projectsResult, messagesResult, applicationsResult] = await Promise.all([
+    supabase.from('team_members').select('*', { count: 'exact', head: true }),
+    supabase.from('publications').select('*', { count: 'exact', head: true }),
+    supabase.from('research_projects').select('*', { count: 'exact', head: true }),
+    supabase.from('contact_submissions').select('*', { count: 'exact', head: true }),
+    supabase.from('researcher_applications').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+  ]);
+
+  // Check for errors
+  if (teamResult.error) throw teamResult.error;
+  if (pubsResult.error) throw pubsResult.error;
+  if (projectsResult.error) throw projectsResult.error;
+  if (messagesResult.error) throw messagesResult.error;
+  if (applicationsResult.error) throw applicationsResult.error;
+
+  return {
+    team: teamResult.count || 0,
+    publications: pubsResult.count || 0,
+    projects: projectsResult.count || 0,
+    messages: messagesResult.count || 0,
+    applications: applicationsResult.count || 0,
+  };
+}
+
 export async function updateContactStatus(id, status) {
   const { data, error } = await supabase.from('contact_submissions').update({ status }).eq('id', id).select().single();
   if (error) throw error;

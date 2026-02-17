@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiUsers, FiFileText, FiFolder, FiMessageSquare, FiUserPlus } from 'react-icons/fi';
-import {
-  getTeamMembersAdmin,
-  getPublicationsAdmin,
-  getProjectsAdmin,
-  getContactSubmissions,
-  getResearcherApplications,
-} from '../../lib/supabase';
+import { getDashboardStats } from '../../lib/supabase';
 import './Dashboard.css';
 
 export default function DashboardHome() {
@@ -23,22 +17,10 @@ export default function DashboardHome() {
   useEffect(() => {
     async function load() {
       try {
-        const [team, pubs, projects, messages, applications] = await Promise.all([
-          getTeamMembersAdmin(),
-          getPublicationsAdmin(),
-          getProjectsAdmin(),
-          getContactSubmissions(),
-          getResearcherApplications(),
-        ]);
-        setStats({
-          team: team.length,
-          publications: pubs.length,
-          projects: projects.length,
-          messages: messages.length,
-          applications: applications.filter((a) => a.status === 'pending').length,
-        });
+        const dashboardStats = await getDashboardStats();
+        setStats(dashboardStats);
       } catch (e) {
-        console.error(e);
+        console.error('Failed to load dashboard stats:', e);
       } finally {
         setLoading(false);
       }
@@ -47,7 +29,24 @@ export default function DashboardHome() {
   }, []);
 
   if (loading) {
-    return <div className="dashboard-page"><p>Loading...</p></div>;
+    return (
+      <div className="dashboard-page">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              border: '4px solid rgba(78, 205, 196, 0.2)', 
+              borderTopColor: 'var(--color-teal)', 
+              borderRadius: '50%', 
+              animation: 'spin 0.8s linear infinite',
+              margin: '0 auto 16px'
+            }}></div>
+            <p style={{ color: 'var(--color-text-medium)' }}>Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const cards = [
