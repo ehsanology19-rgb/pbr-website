@@ -39,7 +39,7 @@ export default function About() {
               Dedicated to Scientific Excellence Since Day One
             </h2>
             <p className="about__description">
-              Padma BioResearch Organization (PBR) is a research-driven scientific
+              Padma Bioresearch Organization (PBR) is a research-driven scientific
               body committed to advancing knowledge in life sciences and
               biotechnology. Founded on the principles of academic rigor and
               interdisciplinary collaboration, PBR operates at the intersection of

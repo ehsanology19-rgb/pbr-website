@@ -63,7 +63,9 @@ export default function AdminDashboard() {
       <aside className={`admin-sidebar ${sidebarOpen ? 'admin-sidebar--open' : ''}`}>
         <div className="admin-sidebar__header">
           <Link to="/" className="admin-sidebar__logo">
-            <span className="admin-sidebar__logo-icon">P</span>
+            <span className="admin-sidebar__logo-icon">
+              <img className="admin-sidebar__logo-mark" src="/pbr.svg" alt="PBR" />
+            </span>
             <span className="admin-sidebar__logo-text">PBR Admin</span>
           </Link>
         </div>

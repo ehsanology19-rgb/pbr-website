@@ -81,9 +81,11 @@ export default function Navbar() {
     <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
       <div className="navbar__inner container">
         <Link to="/" className="navbar__logo">
-          <span className="navbar__logo-icon">P</span>
+          <span className="navbar__logo-icon">
+            <img className="navbar__logo-mark" src="/pbr.svg" alt="PBR" />
+          </span>
           <span className="navbar__logo-text">
-            <strong>Padma</strong> BioResearch
+            <strong>Padma</strong> Bioresearch
           </span>
         </Link>
 

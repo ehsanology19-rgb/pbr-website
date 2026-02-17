@@ -21,17 +21,21 @@
 }
 
 .footer__logo-icon {
-  width: 36px;
-  height: 36px;
-  background: var(--color-teal);
-  color: var(--color-navy);
+  width: 42px;
+  height: 42px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1.15rem;
+  overflow: hidden;
+  background: transparent;
+}
+
+.footer__logo-mark {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
 }
 
 .footer__logo-text {

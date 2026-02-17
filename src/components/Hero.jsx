@@ -75,7 +75,7 @@ export default function Hero() {
             animate="visible"
             custom={2}
           >
-            Padma BioResearch Organization (PBR) conducts cutting-edge research
+            Padma Bioresearch Organization (PBR) conducts cutting-edge research
             using <em>in silico</em>, <em>in vitro</em>, and <em>in vivo</em>{' '}
             approaches under the guidance of expert researchers and supervisors.
           </motion.p>

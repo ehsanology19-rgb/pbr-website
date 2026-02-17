@@ -46,9 +46,11 @@ export default function Footer() {
         <div className="footer__top">
           <div className="footer__brand">
             <a href="#" className="footer__logo">
-              <span className="footer__logo-icon">P</span>
+              <span className="footer__logo-icon">
+                <img className="footer__logo-mark" src="/pbr.svg" alt="PBR" />
+              </span>
               <span className="footer__logo-text">
-                <strong>Padma</strong> BioResearch
+                <strong>Padma</strong> Bioresearch
               </span>
             </a>
             <p className="footer__desc">
@@ -90,7 +92,7 @@ export default function Footer() {
 
         <div className="footer__bottom">
           <p className="footer__copyright">
-            &copy; {new Date().getFullYear()} Padma BioResearch Organization
+          &copy; {new Date().getFullYear()} Padma Bioresearch Organization
             (PBR). All rights reserved.
           </p>
           <button
