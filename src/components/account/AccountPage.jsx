@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiUpload, FiUser, FiSettings } from 'react-icons/fi';
+import { FiArrowLeft, FiUpload, FiUser } from 'react-icons/fi';
 import { signOut } from '../../lib/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMyProfile, updateMyProfile, uploadAvatar } from '../../lib/supabase';
 import './Account.css';
 
 export default function AccountPage() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [profile, setProfile] = useState(null);
@@ -30,14 +30,11 @@ export default function AccountPage() {
       return;
     }
     let cancelled = false;
-    
-    // Reduced timeout to 8 seconds for faster feedback
+
     const timeoutId = setTimeout(() => {
       if (cancelled) return;
-      console.warn('[AccountPage] Profile load timed out after 8s');
       setLoading(false);
-      setError('Profile load timed out. The profile may not exist yet. You can still create it by filling out the form below.');
-      // Set form with user data even on timeout
+      setError('Profile load timed out. You can still fill out the form below.');
       setForm({
         full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
         email: user.email || '',
@@ -48,18 +45,17 @@ export default function AccountPage() {
       });
     }, 8000);
 
-    // Add a race condition handler for network issues
     const fetchProfile = async () => {
       try {
         const data = await Promise.race([
           getMyProfile(user.id),
-          new Promise((_, reject) => 
+          new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Request timeout')), 7000)
           )
         ]);
-        
+
         if (cancelled) return;
-        
+
         setProfile(data);
         const base = data || {};
         setForm({
@@ -74,13 +70,8 @@ export default function AccountPage() {
         if (cancelled || e.name === 'AbortError' || e.message?.includes('aborted')) {
           return;
         }
-        
-        console.error('[AccountPage] Error loading profile:', e);
-        
-        // Even on error, allow user to create profile
         if (!cancelled) {
           const errorMsg = e.message || 'Failed to load profile';
-          // Don't show error if profile just doesn't exist yet (null is fine)
           if (!errorMsg.includes('timeout') && !errorMsg.includes('Failed to fetch')) {
             setError(`Note: ${errorMsg}. You can still create your profile below.`);
           }
@@ -183,16 +174,9 @@ export default function AccountPage() {
           <Link to="/" className="account-header__back">
             <FiArrowLeft size={20} /> Back to site
           </Link>
-          <div className="account-header__actions">
-            {isAdmin && (
-              <Link to="/dashboard" className="account-header__admin">
-                <FiSettings size={16} /> Admin Dashboard
-              </Link>
-            )}
-            <button type="button" className="account-header__logout" onClick={handleSignOut}>
-              Sign out
-            </button>
-          </div>
+          <button type="button" className="account-header__logout" onClick={handleSignOut}>
+            Sign out
+          </button>
         </div>
       </header>
 
