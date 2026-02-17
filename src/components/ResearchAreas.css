@@ -1,0 +1,138 @@
+.research {
+  padding: var(--section-padding);
+  background: var(--color-off-white);
+}
+
+.research__header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.research__header .section-label::before {
+  display: none;
+}
+
+.research__header .section-subtitle {
+  margin: 0 auto;
+}
+
+/* Cards grid */
+.research__cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.research__card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-medium);
+}
+
+.research__card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+  border-color: transparent;
+}
+
+/* Card top (gradient header) */
+.research__card-top {
+  padding: 36px 32px 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.research__card-top::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  right: -40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.research__card-tag {
+  display: inline-block;
+  padding: 4px 14px;
+  background: rgba(78, 205, 196, 0.15);
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-teal-light);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 20px;
+}
+
+.research__card-icon {
+  color: var(--color-teal);
+  margin-bottom: 16px;
+}
+
+.research__card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+/* Card body */
+.research__card-body {
+  padding: 28px 32px 32px;
+}
+
+.research__card-desc {
+  font-size: 0.92rem;
+  color: var(--color-text-medium);
+  line-height: 1.75;
+  margin-bottom: 20px;
+}
+
+.research__card-list {
+  margin-bottom: 24px;
+}
+
+.research__card-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  padding: 6px 0;
+  font-weight: 500;
+}
+
+.research__card-bullet {
+  width: 6px;
+  height: 6px;
+  background: var(--color-teal);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.research__card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-deep-teal);
+  transition: var(--transition-fast);
+}
+
+.research__card-link:hover {
+  color: var(--color-teal);
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .research__cards {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}

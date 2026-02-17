@@ -1,0 +1,207 @@
+.publications {
+  padding: var(--section-padding);
+  background: var(--color-white);
+}
+
+.publications__header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.publications__header .section-label::before {
+  display: none;
+}
+
+.publications__header .section-subtitle {
+  margin: 0 auto;
+}
+
+/* Achievement cards */
+.publications__achievements {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 72px;
+}
+
+.publications__achievement {
+  text-align: center;
+  padding: 36px 24px;
+  background: var(--color-off-white);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: all var(--transition-medium);
+}
+
+.publications__achievement:hover {
+  border-color: rgba(78, 205, 196, 0.2);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.publications__achievement-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, var(--color-navy), var(--color-deep-teal));
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-teal);
+}
+
+.publications__achievement-value {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.publications__achievement-title {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.publications__achievement-desc {
+  font-size: 0.82rem;
+  color: var(--color-text-light);
+  line-height: 1.6;
+}
+
+/* Publications list */
+.publications__list-section {
+  background: var(--color-off-white);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+}
+
+.publications__list-heading {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.publications__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.publications__item {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 24px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.publications__item:hover {
+  background: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.publications__item-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+}
+
+.publications__item-type {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+.publications__item-type--in-silico {
+  background: rgba(10, 37, 64, 0.08);
+  color: var(--color-navy);
+}
+
+.publications__item-type--in-vitro {
+  background: rgba(13, 92, 99, 0.08);
+  color: var(--color-deep-teal);
+}
+
+.publications__item-type--in-vivo {
+  background: rgba(212, 168, 83, 0.12);
+  color: #8B6914;
+}
+
+.publications__item-year {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.publications__item-content {
+  flex: 1;
+}
+
+.publications__item-title {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.publications__item-journal {
+  font-size: 0.82rem;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.publications__item-link {
+  color: var(--color-text-light);
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+}
+
+.publications__item:hover .publications__item-link {
+  color: var(--color-teal);
+}
+
+@media (max-width: 1024px) {
+  .publications__achievements {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .publications__achievements {
+    grid-template-columns: 1fr;
+  }
+
+  .publications__item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .publications__item-left {
+    flex-direction: row;
+  }
+
+  .publications__list-section {
+    padding: 24px;
+  }
+}

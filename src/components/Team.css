@@ -1,0 +1,122 @@
+.team {
+  padding: var(--section-padding);
+  background: var(--color-off-white);
+}
+
+.team__header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.team__header .section-label::before {
+  display: none;
+}
+
+.team__header .section-subtitle {
+  margin: 0 auto;
+}
+
+/* Grid */
+.team__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* Card */
+.team__card {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: 36px 28px;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-medium);
+}
+
+.team__card:hover {
+  border-color: transparent;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.team__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team__avatar span {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.team__name {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  margin-bottom: 4px;
+}
+
+.team__role {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-deep-teal);
+  margin-bottom: 12px;
+}
+
+.team__specialization {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--color-off-white);
+  border-radius: 50px;
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+  margin-bottom: 20px;
+}
+
+.team__socials {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.team__social {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light);
+  transition: all var(--transition-fast);
+}
+
+.team__social:hover {
+  border-color: var(--color-teal);
+  color: var(--color-teal);
+  background: var(--color-teal-bg);
+}
+
+@media (max-width: 1024px) {
+  .team__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .team__grid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}

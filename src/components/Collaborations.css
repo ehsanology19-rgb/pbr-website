@@ -1,0 +1,126 @@
+.collabs {
+  padding: var(--section-padding);
+  background: linear-gradient(135deg, #0A2540 0%, #0D3B66 50%, #0D5C63 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.collabs::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: rgba(78, 205, 196, 0.04);
+}
+
+.collabs .section-label {
+  color: var(--color-teal);
+}
+
+.collabs .section-title {
+  color: var(--color-white);
+}
+
+.collabs .section-subtitle {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Layout */
+.collabs__layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+/* Stats */
+.collabs__stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 36px;
+}
+
+.collabs__stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.collabs__stat-icon {
+  color: var(--color-teal);
+}
+
+.collabs__stat strong {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-white);
+  line-height: 1.2;
+}
+
+.collabs__stat span {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Partner grid */
+.collabs__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.collabs__card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-medium);
+}
+
+.collabs__card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(78, 205, 196, 0.2);
+  transform: translateX(4px);
+}
+
+.collabs__card-logo {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: rgba(78, 205, 196, 0.12);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-teal);
+}
+
+.collabs__card-name {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-white);
+  margin-bottom: 2px;
+}
+
+.collabs__card-type {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 1024px) {
+  .collabs__layout {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
