@@ -22,20 +22,20 @@ const contactInfo = [
   {
     icon: <FiMail size={20} />,
     label: 'Email Us',
-    value: 'contact@padmabioresearch.org',
-    href: 'mailto:contact@padmabioresearch.org',
+    value: 'padmabioresearch@gmail.com',
+    href: 'mailto:padmabioresearch@gmail.com',
   },
   {
     icon: <FiPhone size={20} />,
     label: 'Call Us',
-    value: '+91-XXXXX-XXXXX',
-    href: 'tel:+91XXXXXXXXXX',
+    value: '+880 1303-948311',
+    href: 'tel:+8801303948311',
   },
   {
     icon: <FiMapPin size={20} />,
     label: 'Visit Us',
-    value: 'India',
-    href: '#',
+    value: 'Jahangirnagar University, Dhaka',
+    href: 'https://maps.google.com/?q=Jahangirnagar+University+Dhaka',
   },
 ];
 
