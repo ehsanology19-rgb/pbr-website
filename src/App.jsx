@@ -8,6 +8,7 @@ import SignupPage from './components/auth/SignupPage';
 import ResearcherApplication from './components/auth/ResearcherApplication';
 import AccountPage from './components/account/AccountPage';
 import AdminDashboard from './components/admin/AdminDashboard';
+import ExecutiveCommittee from './components/ExecutiveCommittee';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/apply" element={<ResearcherApplication />} />
+          <Route path="/executive-committee" element={<ExecutiveCommittee />} />
           <Route
             path="/account"
             element={

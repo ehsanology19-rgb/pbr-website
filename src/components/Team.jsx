@@ -126,6 +126,17 @@ export default function Team() {
             </motion.div>
           ))}
         </div>
+
+        <motion.div
+          className="team__cta"
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
+          <a href="/executive-committee" className="btn btn-outline">
+            Full Executive Committee
+          </a>
+        </motion.div>
       </div>
     </section>
   );

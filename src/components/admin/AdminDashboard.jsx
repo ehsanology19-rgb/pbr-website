@@ -17,6 +17,7 @@ import {
   adminGetCollaborations, adminCreateCollaboration, adminUpdateCollaboration, adminDeleteCollaboration,
   adminGetContactSubmissions, adminUpdateContactStatus,
   adminGetApplications, adminUpdateApplicationStatus,
+  adminGetExecutiveCommitteeMembers, adminCreateExecutiveCommitteeMember, adminUpdateExecutiveCommitteeMember, adminDeleteExecutiveCommitteeMember,
 } from '../../lib/supabase';
 import AdminFormModal from './AdminFormModal';
 import './AdminDashboard.css';
@@ -24,6 +25,7 @@ import './AdminDashboard.css';
 const SECTIONS = [
   { id: 'overview', label: 'Overview', icon: FiHome },
   { id: 'team', label: 'Team Members', icon: FiUsers },
+  { id: 'executive', label: 'Executive Committee', icon: FiUsers },
   { id: 'publications', label: 'Publications', icon: FiFileText },
   { id: 'projects', label: 'Projects', icon: FiFolder },
   { id: 'collaborations', label: 'Collaborations', icon: FiGlobe },
@@ -99,6 +101,7 @@ export default function AdminDashboard() {
         <div className="admin-content">
           {activeSection === 'overview' && <OverviewSection stats={stats} loading={statsLoading} onRefresh={loadStats} />}
           {activeSection === 'team' && <TeamSection />}
+          {activeSection === 'executive' && <ExecutiveCommitteeSection />}
           {activeSection === 'publications' && <PublicationsSection />}
           {activeSection === 'projects' && <ProjectsSection />}
           {activeSection === 'collaborations' && <CollaborationsSection />}
@@ -229,6 +232,79 @@ function TeamSection() {
         </table>
       </div>
       {modal && <AdminFormModal title={modal.item ? 'Edit Team Member' : 'Add Team Member'} fields={TEAM_FIELDS} initialData={modal.item} onSave={handleSave} onClose={() => setModal(null)} saving={saving} />}
+    </div>
+  );
+}
+
+/* ========== EXECUTIVE COMMITTEE ========== */
+const EXECUTIVE_FIELDS = [
+  { key: 'name', label: 'Full Name', type: 'text', required: true, placeholder: 'e.g. Fahmid Khalil Rafil' },
+  { key: 'position', label: 'Position/Role', type: 'text', required: true, placeholder: 'e.g. President, Secretary, etc.' },
+  { key: 'member_type', label: 'Member Type', type: 'select', required: true, options: ['advisor', 'executive', 'wing'], defaultValue: 'executive' },
+  { key: 'wing', label: 'Wing (if applicable)', type: 'text', placeholder: 'e.g. IT Wing, Project Management Wing (leave empty for Advisor/Executive)' },
+  { key: 'display_order', label: 'Display Order', type: 'number', min: 0, defaultValue: 0 },
+  { key: 'is_active', label: 'Active (visible on website)', type: 'checkbox', defaultValue: true },
+];
+
+function ExecutiveCommitteeSection() {
+  const { data, loading, error, reload } = useDataSection(adminGetExecutiveCommitteeMembers);
+  const [modal, setModal] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState('');
+
+  const handleSave = async (formData) => {
+    setSaving(true); setActionError('');
+    try {
+      // Clear wing if not a wing member
+      if (formData.member_type !== 'wing') {
+        formData.wing = null;
+      }
+      if (modal.item) { await adminUpdateExecutiveCommitteeMember(modal.item.id, formData); }
+      else { await adminCreateExecutiveCommitteeMember(formData); }
+      setModal(null); reload();
+    } catch (err) { setActionError(err.message); }
+    finally { setSaving(false); }
+  };
+
+  const handleToggle = async (m) => { setActionError(''); try { await adminUpdateExecutiveCommitteeMember(m.id, { is_active: !m.is_active }); reload(); } catch (e) { setActionError(e.message); } };
+  const handleDelete = async (m) => { if (!window.confirm(`Delete "${m.name}"?`)) return; setActionError(''); try { await adminDeleteExecutiveCommitteeMember(m.id); reload(); } catch (e) { setActionError(e.message); } };
+
+  if (loading) return <div className="admin-loading">Loading executive committee members...</div>;
+  if (error) return <AdminError message={error} onRetry={reload} />;
+
+  return (
+    <div>
+      {actionError && <div className="admin-action-error">{actionError}</div>}
+      <div className="admin-section-header">
+        <p className="admin-section-count">{data.length} member{data.length !== 1 ? 's' : ''}</p>
+        <div className="admin-section-header__right">
+          <button className="btn btn-outline" onClick={reload}><FiRefreshCw size={14} /> Refresh</button>
+          <button className="btn btn-primary" onClick={() => setModal({ item: null })}><FiPlus size={14} /> Add Member</button>
+        </div>
+      </div>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead><tr><th>Name</th><th>Position</th><th>Type</th><th>Wing</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            {data.map((m) => (
+              <tr key={m.id}>
+                <td className="admin-table__name">{m.name}</td>
+                <td>{m.position}</td>
+                <td><span className="admin-badge admin-badge--blue">{m.member_type}</span></td>
+                <td>{m.wing || '—'}</td>
+                <td><StatusBadge active={m.is_active} /></td>
+                <td className="admin-table__actions">
+                  <button className="admin-action-btn" onClick={() => setModal({ item: m })} title="Edit"><FiEdit2 size={14} /></button>
+                  <button className={`admin-action-btn ${m.is_active ? 'admin-action-btn--warn' : 'admin-action-btn--success'}`} onClick={() => handleToggle(m)} title={m.is_active ? 'Deactivate' : 'Activate'}>{m.is_active ? <FiX size={14} /> : <FiCheck size={14} />}</button>
+                  <button className="admin-action-btn admin-action-btn--danger" onClick={() => handleDelete(m)} title="Delete"><FiTrash2 size={14} /></button>
+                </td>
+              </tr>
+            ))}
+            {data.length === 0 && <tr><td colSpan={6} className="admin-table__empty">No executive committee members found.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      {modal && <AdminFormModal title={modal.item ? 'Edit Executive Committee Member' : 'Add Executive Committee Member'} fields={EXECUTIVE_FIELDS} initialData={modal.item} onSave={handleSave} onClose={() => setModal(null)} saving={saving} />}
     </div>
   );
 }

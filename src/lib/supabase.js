@@ -481,6 +481,63 @@ export async function adminGetDashboardStats() {
 }
 
 // ============================================
+// Executive Committee Members API
+// ============================================
+export async function getExecutiveCommitteeMembers() {
+  const { data, error } = await supabase
+    .from('executive_committee_members')
+    .select('*')
+    .eq('is_active', true)
+    .order('member_type', { ascending: true })
+    .order('display_order', { ascending: true });
+  
+  if (error) throw error;
+  return data;
+}
+
+// ============================================
+// Admin: Executive Committee Members API
+// ============================================
+export async function adminGetExecutiveCommitteeMembers() {
+  const { data, error } = await supabase
+    .from('executive_committee_members')
+    .select('*')
+    .order('member_type', { ascending: true })
+    .order('display_order', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function adminCreateExecutiveCommitteeMember(formData) {
+  const { data, error } = await supabase
+    .from('executive_committee_members')
+    .insert([formData])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function adminUpdateExecutiveCommitteeMember(id, formData) {
+  const { data, error } = await supabase
+    .from('executive_committee_members')
+    .update(formData)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function adminDeleteExecutiveCommitteeMember(id) {
+  const { error } = await supabase
+    .from('executive_committee_members')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
+// ============================================
 // User profile
 // ============================================
 export async function getMyProfile(userId) {
