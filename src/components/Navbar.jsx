@@ -15,10 +15,63 @@ const navLinks = [
   { label: 'Contact', href: '#contact' },
 ];
 
+// Dropdown menu for user actions
+function UserDropdown({ user, isAdmin, onSignOut }) {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <div className="navbar__user-dropdown">
+      <button 
+        className="navbar__user-btn"
+        onClick={() => setOpen(!open)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+      >
+        <span className="navbar__user-avatar">
+          {user?.user_metadata?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+        </span>
+        <svg className={`navbar__dropdown-arrow ${open ? 'open' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      
+      {open && (
+        <div className="navbar__dropdown-menu">
+          {isAdmin && (
+            <Link to="/dashboard" className="navbar__dropdown-item" onClick={() => setOpen(false)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+              Dashboard
+            </Link>
+          )}
+          <Link to="/account" className="navbar__dropdown-item" onClick={() => setOpen(false)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Account
+          </Link>
+          <button className="navbar__dropdown-item navbar__dropdown-item--danger" onClick={onSignOut}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -58,17 +111,16 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {user ? (
-          <>
-            <Link to="/account" className="navbar__link" style={{ marginRight: 12 }}>Account</Link>
-            <button type="button" className="navbar__link navbar__btn-link" onClick={handleSignOut}>Sign out</button>
-          </>
-        ) : (
-          <Link to="/login" className="navbar__link" style={{ marginRight: 12 }}>Login</Link>
-        )}
-        <a href="#contact" className="btn btn-primary navbar__cta">
-          Get in Touch
-        </a>
+        <div className="navbar__auth">
+          {user ? (
+            <UserDropdown user={user} isAdmin={isAdmin} onSignOut={handleSignOut} />
+          ) : (
+            <>
+              <Link to="/login" className="navbar__auth-link">Sign In</Link>
+              <Link to="/signup" className="btn btn-primary navbar__cta">Sign Up</Link>
+            </>
+          )}
+        </div>
 
         <button
           className="navbar__mobile-toggle"
@@ -98,21 +150,32 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            {user ? (
-              <>
-                <Link to="/account" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>Account</Link>
-                <button type="button" className="navbar__mobile-link" onClick={handleSignOut}>Sign out</button>
-              </>
-            ) : (
-              <Link to="/login" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>Login</Link>
-            )}
-            <a
-              href="#contact"
-              className="btn btn-primary"
-              onClick={() => setMobileOpen(false)}
-            >
-              Get in Touch
-            </a>
+            <div className="navbar__mobile-auth">
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <Link to="/dashboard" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>
+                      Dashboard
+                    </Link>
+                  )}
+                  <Link to="/account" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>
+                    Account
+                  </Link>
+                  <button type="button" className="navbar__mobile-link navbar__mobile-link--danger" onClick={handleSignOut}>
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>
+                    Sign In
+                  </Link>
+                  <Link to="/signup" className="btn btn-primary" onClick={() => setMobileOpen(false)}>
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
