@@ -91,21 +91,32 @@ export async function getSession() {
  */
 export async function getUserRole(userId) {
   if (roleCache.has(userId)) {
-    return roleCache.get(userId);
+    const cached = roleCache.get(userId);
+    console.log(`[getUserRole] Using cached role for ${userId}:`, cached);
+    return cached;
   }
 
-  const { data, error } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .limit(1)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
 
-  if (error) throw error;
+    if (error) {
+      console.error('[getUserRole] Supabase error:', error);
+      throw error;
+    }
 
-  const role = data?.role || 'student';
-  roleCache.set(userId, role);
-  return role;
+    const role = data?.role || 'student';
+    console.log(`[getUserRole] Fetched role for ${userId}:`, role, 'Raw data:', data);
+    roleCache.set(userId, role);
+    return role;
+  } catch (err) {
+    console.error('[getUserRole] Error fetching role:', err);
+    throw err;
+  }
 }
 
 /**
