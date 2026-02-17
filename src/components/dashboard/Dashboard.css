@@ -164,6 +164,9 @@
 .dashboard-card--green .dashboard-card__icon { color: var(--color-deep-teal); }
 .dashboard-card--orange .dashboard-card__icon { color: #ea580c; }
 .dashboard-card--purple .dashboard-card__icon { color: #7c3aed; }
+.dashboard-card--blue .dashboard-card__icon { color: #2563eb; }
+.dashboard-card--pink .dashboard-card__icon { color: #ec4899; }
+.dashboard-card--gray .dashboard-card__icon { color: #6b7280; }
 
 .dashboard-card__content {
   display: flex;
