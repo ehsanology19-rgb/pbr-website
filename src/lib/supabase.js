@@ -326,9 +326,20 @@ export async function adminGetProjects() {
 }
 
 export async function adminCreateProject(payload) {
+  // If admin doesn't set a progress value for an active project,
+  // auto-assign a random progress between 50–85%.
+  const project = { ...payload };
+  const isActiveStatus = (project.status || 'Active') === 'Active';
+  const hasNoProgress = project.progress == null || Number(project.progress) === 0;
+
+  if (isActiveStatus && hasNoProgress) {
+    // Inclusive range [50, 85]
+    project.progress = Math.floor(50 + Math.random() * 36);
+  }
+
   const { data, error } = await supabase
     .from('research_projects')
-    .insert([payload])
+    .insert([project])
     .select()
     .single();
   if (error) throw error;
@@ -336,9 +347,18 @@ export async function adminCreateProject(payload) {
 }
 
 export async function adminUpdateProject(id, updates) {
+  const projectUpdates = { ...updates };
+  const isActiveStatus = (projectUpdates.status || 'Active') === 'Active';
+  const hasNoProgress =
+    projectUpdates.progress == null || Number(projectUpdates.progress) === 0;
+
+  if (isActiveStatus && hasNoProgress) {
+    projectUpdates.progress = Math.floor(50 + Math.random() * 36);
+  }
+
   const { data, error } = await supabase
     .from('research_projects')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...projectUpdates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();

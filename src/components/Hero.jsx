@@ -7,12 +7,12 @@ import './Hero.css';
 const stats = [
   {
     icon: <HiOutlineDocumentText size={22} />,
-    value: '50+',
+    value: '10+',
     label: 'Published Research Papers',
   },
   {
     icon: <FiUsers size={22} />,
-    value: '10+',
+    value: '5+',
     label: 'Years of Collective Expertise',
   },
   {
