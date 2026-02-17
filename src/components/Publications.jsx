@@ -14,25 +14,25 @@ import './Publications.css';
 const achievements = [
   {
     icon: <HiOutlineDocumentText size={28} />,
-    value: '50+',
+    value: '10+',
     title: 'Research Papers',
     desc: 'Published in peer-reviewed national and international journals',
   },
   {
     icon: <HiOutlineAcademicCap size={28} />,
-    value: '25+',
+    value: '10+',
     title: 'Conference Presentations',
     desc: 'Showcased at leading biomedical and pharmaceutical conferences',
   },
   {
     icon: <HiOutlineGlobe size={28} />,
-    value: '15+',
+    value: '—',
     title: 'Collaborative Projects',
     desc: 'With universities, research labs, and industry partners worldwide',
   },
   {
     icon: <HiOutlineStar size={28} />,
-    value: '10+',
+    value: '1',
     title: 'Awards & Recognitions',
     desc: 'For outstanding contributions to bioresearch and mentorship',
   },
