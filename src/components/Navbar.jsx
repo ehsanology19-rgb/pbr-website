@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HiMenuAlt3, HiX } from 'react-icons/hi';
+import { HiMenuAlt3, HiX, HiChevronDown } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signOut } from '../lib/auth';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,70 +15,56 @@ const navLinks = [
   { label: 'Contact', href: '#contact' },
 ];
 
-// Dropdown menu for user actions
-function UserDropdown({ user, isAdmin, onSignOut }) {
-  const [open, setOpen] = useState(false);
+// Helper function to get user initials
+function getUserInitials(user) {
+  if (!user) return 'U';
   
-  return (
-    <div className="navbar__user-dropdown">
-      <button 
-        className="navbar__user-btn"
-        onClick={() => setOpen(!open)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
-      >
-        <span className="navbar__user-avatar">
-          {user?.user_metadata?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-        </span>
-        <svg className={`navbar__dropdown-arrow ${open ? 'open' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-      
-      {open && (
-        <div className="navbar__dropdown-menu">
-          {isAdmin && (
-            <Link to="/dashboard" className="navbar__dropdown-item" onClick={() => setOpen(false)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7" rx="1"/>
-                <rect x="14" y="3" width="7" height="7" rx="1"/>
-                <rect x="3" y="14" width="7" height="7" rx="1"/>
-                <rect x="14" y="14" width="7" height="7" rx="1"/>
-              </svg>
-              Dashboard
-            </Link>
-          )}
-          <Link to="/account" className="navbar__dropdown-item" onClick={() => setOpen(false)}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            Account
-          </Link>
-          <button className="navbar__dropdown-item navbar__dropdown-item--danger" onClick={onSignOut}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16,17 21,12 16,7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            Sign Out
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  // Try to get from user_metadata first
+  const fullName = user.user_metadata?.full_name || user.user_metadata?.name;
+  if (fullName) {
+    const names = fullName.trim().split(' ');
+    if (names.length >= 2) {
+      return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+    }
+    return fullName.substring(0, 2).toUpperCase();
+  }
+  
+  // Fallback to email
+  if (user.email) {
+    return user.email.substring(0, 2).toUpperCase();
+  }
+  
+  return 'U';
 }
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
   const handleSignOut = async () => {
     await signOut();
     setMobileOpen(false);
+    setDropdownOpen(false);
     navigate('/');
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [dropdownOpen]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -111,16 +97,50 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <div className="navbar__auth">
-          {user ? (
-            <UserDropdown user={user} isAdmin={isAdmin} onSignOut={handleSignOut} />
-          ) : (
-            <>
-              <Link to="/login" className="navbar__auth-link">Sign In</Link>
-              <Link to="/signup" className="btn btn-primary navbar__cta">Sign Up</Link>
-            </>
-          )}
-        </div>
+        {user ? (
+          <div className="navbar__user-menu" ref={dropdownRef}>
+            <button
+              className="navbar__avatar-btn"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              aria-label="User menu"
+            >
+              <span className="navbar__avatar">
+                {getUserInitials(user)}
+              </span>
+              <HiChevronDown className={`navbar__dropdown-icon ${dropdownOpen ? 'navbar__dropdown-icon--open' : ''}`} />
+            </button>
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  className="navbar__dropdown"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Link
+                    to="/account"
+                    className="navbar__dropdown-item"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Account
+                  </Link>
+                  <button
+                    type="button"
+                    className="navbar__dropdown-item navbar__dropdown-item--danger"
+                    onClick={handleSignOut}
+                  >
+                    Sign out
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <Link to="/login" className="navbar__signin-btn">
+            Sign In
+          </Link>
+        )}
 
         <button
           className="navbar__mobile-toggle"
@@ -150,32 +170,14 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            <div className="navbar__mobile-auth">
-              {user ? (
-                <>
-                  {isAdmin && (
-                    <Link to="/dashboard" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>
-                      Dashboard
-                    </Link>
-                  )}
-                  <Link to="/account" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>
-                    Account
-                  </Link>
-                  <button type="button" className="navbar__mobile-link navbar__mobile-link--danger" onClick={handleSignOut}>
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link to="/login" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>
-                    Sign In
-                  </Link>
-                  <Link to="/signup" className="btn btn-primary" onClick={() => setMobileOpen(false)}>
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
+            {user ? (
+              <>
+                <Link to="/account" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>Account</Link>
+                <button type="button" className="navbar__mobile-link" onClick={handleSignOut}>Sign out</button>
+              </>
+            ) : (
+              <Link to="/login" className="navbar__mobile-link navbar__mobile-signin" onClick={() => setMobileOpen(false)}>Sign In</Link>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
