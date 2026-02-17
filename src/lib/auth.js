@@ -1,22 +1,15 @@
-// Update user metadata with role caching
-const userMetadata = {}; // Store user metadata for caching
+// Optimize dashboard loading with in-memory role caching
+const roleCache = new Map();
 
-function getUserRole(userId) {
-    // Check if the user role is already cached
-    if (userMetadata[userId]) {
-        return userMetadata[userId].role;
+// Function to get roles for a user
+async function getRoles(userId) {
+    if (roleCache.has(userId)) {
+        return roleCache.get(userId);
     }
 
-    // If not cached, get it from auth (mock function)
-    const user = getAuthUser(userId); // Assume this fetches user info from authentication platform
-    
-    // Cache the user role
-    userMetadata[userId] = { role: user.role }; 
-    return user.role;
+    const roles = await fetchRolesFromDatabase(userId); // Fetch from database
+    roleCache.set(userId, roles);
+    return roles;
 }
 
-// Mock function to simulate getting the authentication user
-function getAuthUser(userId) {
-    // Mock response
-    return { id: userId, role: 'admin' }; // Example role
-}
+// Other code for handling dashboard loading...
