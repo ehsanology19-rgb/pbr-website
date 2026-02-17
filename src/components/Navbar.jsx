@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { HiMenuAlt3, HiX, HiChevronDown, HiShieldCheck } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signOut } from '../lib/auth';
@@ -32,7 +32,8 @@ function getUserInitials(user) {
 }
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const [scrolled, setScrolled] = useState(location.pathname !== '/');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, isAdmin } = useAuth();
@@ -67,10 +68,17 @@ export default function Navbar() {
   }, [dropdownOpen]);
 
   useEffect(() => {
+    // On the home page, navbar becomes solid after scrolling.
+    // On all inner pages, keep it solid from the start.
+    if (location.pathname !== '/') {
+      setScrolled(true);
+      return undefined;
+    }
+
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
