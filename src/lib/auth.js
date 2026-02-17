@@ -112,8 +112,8 @@ export async function getSession() {
 
 /**
  * Get current user's role from user_roles (admin, instructor, student).
+ * First tries the get_my_role() RPC (bypasses RLS), then falls back to direct query.
  * Uses in-memory cache for subsequent calls within the same session.
- * Pass skipCache=true to force a fresh fetch from the database.
  */
 export async function getUserRole(userId, { skipCache = false } = {}) {
   if (!skipCache && roleCache.has(userId)) {
@@ -123,7 +123,23 @@ export async function getUserRole(userId, { skipCache = false } = {}) {
   }
 
   try {
-    console.log(`[getUserRole] Fetching role from DB for userId: ${userId}`);
+    console.log(`[getUserRole] Fetching role for userId: ${userId}`);
+
+    // Method 1: Try RPC function (bypasses RLS - most reliable)
+    const { data: rpcData, error: rpcError } = await supabase.rpc('get_my_role');
+
+    if (!rpcError && rpcData) {
+      const role = rpcData;
+      console.log(`[getUserRole] RPC returned role: ${role} for ${userId}`);
+      roleCache.set(userId, role);
+      return role;
+    }
+
+    if (rpcError) {
+      console.warn('[getUserRole] RPC failed (function may not exist yet), falling back to direct query:', rpcError.message);
+    }
+
+    // Method 2: Fallback to direct table query
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -132,21 +148,20 @@ export async function getUserRole(userId, { skipCache = false } = {}) {
       .maybeSingle();
 
     if (error) {
-      console.error('[getUserRole] Supabase error:', error);
+      console.error('[getUserRole] Direct query error:', error);
       throw error;
     }
 
-    console.log(`[getUserRole] Query result - data:`, data);
-    
+    console.log(`[getUserRole] Direct query result:`, data);
+
     if (!data) {
-      console.warn(`[getUserRole] No role found for userId ${userId}, defaulting to 'student'`);
-      const role = 'student';
-      roleCache.set(userId, role);
-      return role;
+      console.warn(`[getUserRole] No role found for ${userId}, defaulting to student`);
+      roleCache.set(userId, 'student');
+      return 'student';
     }
 
     const role = data.role || 'student';
-    console.log(`[getUserRole] Fetched role for ${userId}:`, role);
+    console.log(`[getUserRole] Resolved role: ${role} for ${userId}`);
     roleCache.set(userId, role);
     return role;
   } catch (err) {
