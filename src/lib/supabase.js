@@ -433,7 +433,7 @@ export async function getMyProfile(userId) {
 
 export async function updateMyProfile(userId, updates) {
   const payload = { ...updates, updated_at: new Date().toISOString() };
-  const { data: existing } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+  const { data: existing } = await supabase.from('profiles').select('id, email').eq('id', userId).maybeSingle();
   if (existing) {
     const { data, error } = await supabase
       .from('profiles')
@@ -444,9 +444,15 @@ export async function updateMyProfile(userId, updates) {
     if (error) throw error;
     return data;
   }
+  // Profile doesn't exist, create it - get email from auth.users if not provided
+  let email = updates.email;
+  if (!email) {
+    const { data: { user } } = await supabase.auth.getUser(userId);
+    email = user?.email || null;
+  }
   const { data, error } = await supabase
     .from('profiles')
-    .insert([{ id: userId, ...payload }])
+    .insert([{ id: userId, email, ...payload }])
     .select()
     .single();
   if (error) throw error;

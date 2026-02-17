@@ -30,46 +30,78 @@ export default function AccountPage() {
       return;
     }
     let cancelled = false;
+    
+    // Reduced timeout to 8 seconds for faster feedback
     const timeoutId = setTimeout(() => {
       if (cancelled) return;
+      console.warn('[AccountPage] Profile load timed out after 8s');
       setLoading(false);
-      setError('Profile load timed out. Please refresh the page.');
-    }, 12000);
+      setError('Profile load timed out. The profile may not exist yet. You can still create it by filling out the form below.');
+      // Set form with user data even on timeout
+      setForm({
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+        email: user.email || '',
+        phone: '',
+        university: '',
+        field_of_study: '',
+        bio: '',
+      });
+    }, 8000);
 
-    getMyProfile(user.id)
-      .then((data) => {
-        if (!cancelled) {
-          setProfile(data);
-          const base = data || {};
-          setForm({
-            full_name: base.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-            email: base.email || user.email || '',
-            phone: base.phone || '',
-            university: base.university || '',
-            field_of_study: base.field_of_study || '',
-            bio: base.bio || '',
-          });
-        }
-      })
-      .catch((e) => {
-        if (e.name === 'AbortError' || e.message?.includes('aborted')) {
+    // Add a race condition handler for network issues
+    const fetchProfile = async () => {
+      try {
+        const data = await Promise.race([
+          getMyProfile(user.id),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), 7000)
+          )
+        ]);
+        
+        if (cancelled) return;
+        
+        setProfile(data);
+        const base = data || {};
+        setForm({
+          full_name: base.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+          email: base.email || user.email || '',
+          phone: base.phone || '',
+          university: base.university || '',
+          field_of_study: base.field_of_study || '',
+          bio: base.bio || '',
+        });
+      } catch (e) {
+        if (cancelled || e.name === 'AbortError' || e.message?.includes('aborted')) {
           return;
         }
+        
+        console.error('[AccountPage] Error loading profile:', e);
+        
+        // Even on error, allow user to create profile
         if (!cancelled) {
-          setError(e.message || 'Failed to load profile');
-          setForm((prev) => ({
-            ...prev,
+          const errorMsg = e.message || 'Failed to load profile';
+          // Don't show error if profile just doesn't exist yet (null is fine)
+          if (!errorMsg.includes('timeout') && !errorMsg.includes('Failed to fetch')) {
+            setError(`Note: ${errorMsg}. You can still create your profile below.`);
+          }
+          setForm({
             full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
             email: user.email || '',
-          }));
+            phone: '',
+            university: '',
+            field_of_study: '',
+            bio: '',
+          });
         }
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) {
           clearTimeout(timeoutId);
           setLoading(false);
         }
-      });
+      }
+    };
+
+    fetchProfile();
 
     return () => {
       cancelled = true;

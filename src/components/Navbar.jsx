@@ -41,15 +41,25 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
   const handleSignOut = async () => {
-    await signOut();
-    setMobileOpen(false);
-    setDropdownOpen(false);
-    navigate('/');
+    try {
+      await signOut();
+      setMobileOpen(false);
+      setDropdownOpen(false);
+      navigate('/');
+    } catch (error) {
+      console.error('[Navbar] Sign out error:', error);
+      // Even if signOut fails, try to navigate away and clear local state
+      setMobileOpen(false);
+      setDropdownOpen(false);
+      navigate('/');
+      // Force a page reload to clear any cached auth state
+      window.location.href = '/';
+    }
   };
 
   // Close dropdown when clicking outside
@@ -125,6 +135,15 @@ export default function Navbar() {
                   >
                     Account
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/dashboard"
+                      className="navbar__dropdown-item navbar__dropdown-item--admin"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      Admin
+                    </Link>
+                  )}
                   <button
                     type="button"
                     className="navbar__dropdown-item navbar__dropdown-item--danger"
@@ -173,6 +192,9 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link to="/account" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>Account</Link>
+                {isAdmin && (
+                  <Link to="/dashboard" className="navbar__mobile-link" onClick={() => setMobileOpen(false)}>Admin</Link>
+                )}
                 <button type="button" className="navbar__mobile-link" onClick={handleSignOut}>Sign out</button>
               </>
             ) : (
