@@ -10,8 +10,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Initial session check - don't block on role fetch
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setLoading(false); // Allow UI to render immediately
+      
+      // Fetch role in background (non-blocking)
       if (session?.user) {
         try {
           const r = await getUserRole(session.user.id);
@@ -22,13 +26,16 @@ export function AuthProvider({ children }) {
       } else {
         setRole(null);
       }
-      setLoading(false);
     });
 
+    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false); // Don't block UI render
+      
+      // Update role in background
       if (session?.user) {
         try {
           const r = await getUserRole(session.user.id);
@@ -39,7 +46,6 @@ export function AuthProvider({ children }) {
       } else {
         setRole(null);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
